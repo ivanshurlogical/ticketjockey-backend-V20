@@ -292,6 +292,11 @@ exports.getEventUnlockOfferToken = async () => {
         } else {
           failedEventCount++;
         }
+        console.log(`getEventUnlockOfferLogs API: ${totalApiCount}`);
+        console.log(`getEventUnlockOfferLogs success API: ${successApiCount}`);
+        console.log(`getEventUnlockOfferLogs failed API: ${failedApiCount}`);
+        console.log(`getEventUnlockOfferLogs failed token: ${failedTokenCount}`);
+        console.log(`getEventUnlockOfferLogs invalid code: ${inValidCodeCount}`);
       }
     }
     console.log(
@@ -303,11 +308,6 @@ exports.getEventUnlockOfferToken = async () => {
     console.log(
       `getEventUnlockOfferLogs failed events: ${failedEventCount} out of total events : ${log.length}`
     );
-    console.log(`getEventUnlockOfferLogs API: ${totalApiCount}`);
-    console.log(`getEventUnlockOfferLogs success API: ${successApiCount}`);
-    console.log(`getEventUnlockOfferLogs failed API: ${failedApiCount}`);
-    console.log(`getEventUnlockOfferLogs failed token: ${failedTokenCount}`);
-    console.log(`getEventUnlockOfferLogs invalid code: ${inValidCodeCount}`);
   } catch (err) {
     console.log(err);
   }
