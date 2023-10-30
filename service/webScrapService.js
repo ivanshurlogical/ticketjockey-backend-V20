@@ -261,7 +261,7 @@ exports.getEventUnlockOfferToken = async () => {
                 try {
                   return JSON.parse(document.querySelector('body').innerText);
                 } catch (error) {
-                  console.log(document.querySelector('body').innerText);
+                  return document.querySelector('body').innerText;
                 }
               });
               await browser.close();
@@ -280,6 +280,7 @@ exports.getEventUnlockOfferToken = async () => {
               } else {
                 inValidCodeCount++;
                 console.log('Token not found...');
+                console.log(data);
               }
             } catch (error) {
               console.log(error);
