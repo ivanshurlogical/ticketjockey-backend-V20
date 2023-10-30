@@ -119,7 +119,10 @@ exports.saveTmToken = async () => {
         if (cookies) {
           reese84Cookie = getCookieValue('reese84', cookies);
           if (reese84Cookie) {
-            console.log('reese84 is:', reese84Cookie);
+            console.log();
+            console.log('reese84 fecthed!');
+            console.log(reese84Cookie);
+            console.log();
             const total_data = {
               aws_instanceId: instance,
               token: reese84Cookie,
