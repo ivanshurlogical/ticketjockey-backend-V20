@@ -69,11 +69,6 @@ async function launchPuppeteer(url, debugMode = false) {
   await page.setViewport({ width: 1366, height: 768 });
   const userAgent = userAgents.random().toString();
   await page.setUserAgent(userAgent);
-  await page.goto(url, {
-    waitUntil: 'networkidle2',
-    timeout: 30000,
-  });
-  await simulatePage(page);
   return { browser, page };
 }
 
@@ -91,7 +86,9 @@ exports.saveTmToken = async () => {
   try {
     let instanceIds = ['i-00806418be846ac87', 'i-079b55f0315ebe360'];
     let data = [];
-    for (let instance of instanceIds) {
+    for (let index = 0; index < instanceIds.length; index++) {
+      const instance = instanceIds[index];
+
       var random = Math.floor(Math.random() * 1000);
       let url = '';
       // fet TM URL Dynamic
@@ -110,35 +107,51 @@ exports.saveTmToken = async () => {
       if (eventObj.length > 0) {
         url = `https://www.ticketmaster.com/event/${eventObj[0].eventId}`;
         const { browser, page } = await launchPuppeteer(url);
-        const cookies = await page.evaluate(() => {
-          // Get cookies from the page
-          return document.cookie;
-        });
-        await browser.close();
-
-        let reese84Cookie = '';
-        if (cookies) {
-          reese84Cookie = getCookieValue('reese84', cookies);
-          if (reese84Cookie) {
-            console.log();
-            console.log('reese84 fecthed!');
-            console.log(reese84Cookie);
-            console.log();
-            const total_data = {
-              aws_instanceId: instance,
-              token: reese84Cookie,
-              proxyPort: null,
-              proxyType: '',
-              platform: 'node',
-            };
-            await serverTokenLogsModel.create(total_data);
-            data.push(total_data);
+        try {
+          await page.goto(url, {
+            waitUntil: 'load',
+            timeout: 0,
+          });
+          await Promise.race([
+            page.waitForNavigation({ timeout: 10000 }),
+            page.waitForSelector('body', { visible: true }),
+          ]);
+          await simulatePage(page);
+          const cookies = await page.evaluate(() => {
+            // Get cookies from the page
+            return document.cookie;
+          });
+          let reese84Cookie = '';
+          if (cookies) {
+            reese84Cookie = getCookieValue('reese84', cookies);
+            if (reese84Cookie) {
+              console.log();
+              console.log('reese84 fecthed!');
+              console.log(reese84Cookie);
+              console.log();
+              const total_data = {
+                aws_instanceId: instance,
+                token: reese84Cookie,
+                proxyPort: null,
+                proxyType: '',
+                platform: 'node',
+              };
+              await serverTokenLogsModel.create(total_data);
+              data.push(total_data);
+            } else {
+              console.log('reese84 not found!');
+            }
           } else {
-            console.log('Cookie not found');
+            console.log('Cookies not found!');
           }
+        } catch (error) {
+          console.log(error);
+        } finally {
+          await browser.close();
         }
+        if (index !== instanceIds.length - 1)
+          await await sleep(randomWait(2000, 5000));
       }
-      await sleep(5000);
     }
     return data;
   } catch (error) {
@@ -257,6 +270,15 @@ exports.getEventUnlockOfferToken = async () => {
 
               const url = `https://www.ticketmaster.com/ipa/v2/offercode/validate?eventId=${e.eventId}&code=${e.foundUnlockPromoNames[key]}`;
               const { browser, page } = await launchPuppeteer(url);
+              await page.goto(url, {
+                waitUntil: 'load',
+                timeout: 0,
+              });
+              await Promise.race([
+                page.waitForNavigation({ timeout: 10000 }),
+                page.waitForSelector('body', { visible: true }),
+              ]);
+              await simulatePage(page);
               await page.content();
               const data = await page.evaluate(() => {
                 try {
