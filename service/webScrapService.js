@@ -69,7 +69,7 @@ async function launchPuppeteer(url, debugMode = false) {
   const userAgent = userAgents.random().toString();
   await page.setUserAgent(userAgent);
   await page.goto(url, {
-    waitUntil: 'domcontentloaded',
+    waitUntil: 'load',
     timeout: 0,
   });
   await simulatePage(page);
@@ -258,7 +258,11 @@ exports.getEventUnlockOfferToken = async () => {
               const { browser, page } = await launchPuppeteer(url);
               await page.content();
               const data = await page.evaluate(() => {
-                return JSON.parse(document.querySelector('body').innerText);
+                try {
+                  return JSON.parse(document.querySelector('body').innerText);
+                } catch (error) {
+                  console.log(document.querySelector('body').innerText);
+                }
               });
               await browser.close();
 
@@ -287,16 +291,22 @@ exports.getEventUnlockOfferToken = async () => {
             unlockOffers: unlockOfferObj,
           });
           successEventCount++;
+          console.log(`getEventUnlockOfferLogs API: ${totalApiCount}`);
+          console.log(
+            `getEventUnlockOfferLogs success API: ${successApiCount}`
+          );
+          console.log(`getEventUnlockOfferLogs failed API: ${failedApiCount}`);
+          console.log(
+            `getEventUnlockOfferLogs failed token: ${failedTokenCount}`
+          );
+          console.log(
+            `getEventUnlockOfferLogs invalid code: ${inValidCodeCount}`
+          );
         } else if (unlockOfferObj != null) {
           alreadyUpdatedCount++;
         } else {
           failedEventCount++;
         }
-        console.log(`getEventUnlockOfferLogs API: ${totalApiCount}`);
-        console.log(`getEventUnlockOfferLogs success API: ${successApiCount}`);
-        console.log(`getEventUnlockOfferLogs failed API: ${failedApiCount}`);
-        console.log(`getEventUnlockOfferLogs failed token: ${failedTokenCount}`);
-        console.log(`getEventUnlockOfferLogs invalid code: ${inValidCodeCount}`);
       }
     }
     console.log(
@@ -308,6 +318,11 @@ exports.getEventUnlockOfferToken = async () => {
     console.log(
       `getEventUnlockOfferLogs failed events: ${failedEventCount} out of total events : ${log.length}`
     );
+    console.log(`getEventUnlockOfferLogs API: ${totalApiCount}`);
+    console.log(`getEventUnlockOfferLogs success API: ${successApiCount}`);
+    console.log(`getEventUnlockOfferLogs failed API: ${failedApiCount}`);
+    console.log(`getEventUnlockOfferLogs failed token: ${failedTokenCount}`);
+    console.log(`getEventUnlockOfferLogs invalid code: ${inValidCodeCount}`);
   } catch (err) {
     console.log(err);
   }
