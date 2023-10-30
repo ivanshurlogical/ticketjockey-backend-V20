@@ -276,8 +276,10 @@ exports.getEventUnlockOfferToken = async () => {
                       }
                     : { [key]: data.token };
                 is_updated = true;
+                console.log('Token found...');
               } else {
                 inValidCodeCount++;
+                console.log('Token not found...');
               }
             } catch (error) {
               console.log(error);
