@@ -62,6 +62,7 @@ async function simulatePage(page) {
 async function launchPuppeteer(url, debugMode = false) {
   const browser = await puppeteer.launch({
     headless: !debugMode ? 'new' : false,
+    slowMo: 250,
     args: ['--no-sandbox', '--start-maximized'],
   });
   const page = await browser.newPage();
@@ -69,8 +70,8 @@ async function launchPuppeteer(url, debugMode = false) {
   const userAgent = userAgents.random().toString();
   await page.setUserAgent(userAgent);
   await page.goto(url, {
-    waitUntil: 'load',
-    timeout: 0,
+    waitUntil: 'networkidle2',
+    timeout: 30000,
   });
   await simulatePage(page);
   return { browser, page };
