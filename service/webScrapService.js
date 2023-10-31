@@ -89,7 +89,7 @@ exports.saveTmToken = async () => {
     for (let index = 0; index < instanceIds.length; index++) {
       const instance = instanceIds[index];
 
-      var random = Math.floor(Math.random() * 1000);
+      var random = Math.floor(Math.random() * 10000);
       let url = '';
       // fet TM URL Dynamic
       const eventObj = await eventModel
@@ -106,15 +106,18 @@ exports.saveTmToken = async () => {
 
       if (eventObj.length > 0) {
         url = `https://www.ticketmaster.com/event/${eventObj[0].eventId}`;
+        console.log('Browser launched...');
         const { browser, page } = await launchPuppeteer(url);
         try {
+          await page.setDefaultNavigationTimeout(0);
           await page.goto(url, {
-            waitUntil: 'load',
+            waitUntil: 'domcontentloaded',
             timeout: 0,
           });
           await Promise.race([
-            page.waitForNavigation({ timeout: 10000 }),
-            page.waitForSelector('body', { visible: true }),
+            page.waitForNavigation({ waitUntil: 'networkidle2' }),
+            page.waitForSelector('#edp-event-header'),
+            sleep(5000),
           ]);
           await simulatePage(page);
           const cookies = await page.evaluate(() => {
@@ -148,9 +151,10 @@ exports.saveTmToken = async () => {
           console.log(error);
         } finally {
           await browser.close();
+          console.log('Browser closed...');
         }
         if (index !== instanceIds.length - 1)
-          await await sleep(randomWait(2000, 5000));
+          await sleep(randomWait(2000, 5000));
       }
     }
     return data;
