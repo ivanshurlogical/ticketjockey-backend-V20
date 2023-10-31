@@ -274,10 +274,6 @@ exports.getEventUnlockOfferToken = async () => {
                 waitUntil: 'load',
                 timeout: 0,
               });
-              await Promise.race([
-                page.waitForNavigation({ timeout: 10000 }),
-                page.waitForSelector('body', { visible: true }),
-              ]);
               await simulatePage(page);
               await page.content();
               const data = await page.evaluate(() => {
